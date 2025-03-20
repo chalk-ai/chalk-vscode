@@ -1,5 +1,17 @@
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, window, Terminal, Uri } from 'vscode';
+import { 
+  workspace, 
+  ExtensionContext, 
+  commands, 
+  window, 
+  Terminal, 
+  Uri, 
+  TreeDataProvider,
+  Event,
+  EventEmitter,
+  TreeItem,
+  TreeItemCollapsibleState
+} from 'vscode';
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -13,7 +25,122 @@ const execAsync = promisify(exec);
 
 let client: LanguageClient;
 
+// Interface for chalk environment data
+interface ChalkEnvironment {
+  name: string;
+  project_id: string;
+  id: string;
+  team_id: string;
+}
+
+// Class representing a Chalk environment in the tree view
+class ChalkEnvironmentItem extends TreeItem {
+  constructor(
+    public readonly environment: ChalkEnvironment
+  ) {
+    super(environment.name, TreeItemCollapsibleState.None);
+    this.tooltip = `ID: ${environment.id}\nProject ID: ${environment.project_id}\nTeam ID: ${environment.team_id}`;
+    this.description = `(${environment.project_id})`;
+    this.iconPath = new ThemeIcon('server-environment');
+    
+    // Command to open the environment when clicked
+    this.command = {
+      command: 'chalk-lsp.selectEnvironment',
+      title: 'Select Environment',
+      arguments: [this.environment]
+    };
+  }
+}
+
+// Tree data provider for Chalk environments
+class ChalkEnvironmentsProvider implements TreeDataProvider<ChalkEnvironmentItem> {
+  private _onDidChangeTreeData: EventEmitter<ChalkEnvironmentItem | undefined | null | void> = new EventEmitter<ChalkEnvironmentItem | undefined | null | void>();
+  readonly onDidChangeTreeData: Event<ChalkEnvironmentItem | undefined | null | void> = this._onDidChangeTreeData.event;
+  
+  private environments: ChalkEnvironment[] = [];
+  
+  constructor() {
+    this.refreshEnvironments();
+  }
+  
+  refresh(): void {
+    this.refreshEnvironments();
+    this._onDidChangeTreeData.fire();
+  }
+  
+  getTreeItem(element: ChalkEnvironmentItem): TreeItem {
+    return element;
+  }
+  
+  getChildren(element?: ChalkEnvironmentItem): Thenable<ChalkEnvironmentItem[]> {
+    if (element) {
+      // We don't have child elements
+      return Promise.resolve([]);
+    } else {
+      return Promise.resolve(this.environments.map(env => new ChalkEnvironmentItem(env)));
+    }
+  }
+  
+  private async refreshEnvironments(): Promise<void> {
+    try {
+      // Get the workspace folder paths
+      const workspaceFolders = workspace.workspaceFolders;
+      
+      if (!workspaceFolders || workspaceFolders.length === 0) {
+        return;
+      }
+      
+      // Use the first workspace folder as the current working directory
+      const cwd = workspaceFolders[0].uri.fsPath;
+      
+      try {
+        // Run the chalk env --json command
+        const { stdout } = await execAsync('chalk env --json', { cwd });
+        
+        if (stdout) {
+          const result = JSON.parse(stdout);
+          if (result.environments && Array.isArray(result.environments)) {
+            this.environments = result.environments;
+          }
+        }
+      } catch (execError: any) {
+        // If command fails, reset environments and continue
+        this.environments = [];
+        console.error('Failed to load chalk environments:', execError);
+      }
+    } catch (error) {
+      console.error('Error refreshing environments:', error);
+    }
+  }
+}
+
+// Import ThemeIcon separately because of TypeScript parsing issues
+import { ThemeIcon } from 'vscode';
+
 export function activate(context: ExtensionContext) {
+  // Create the environment tree data provider
+  const environmentsProvider = new ChalkEnvironmentsProvider();
+  
+  // Register the environments view
+  const environmentsTreeView = window.createTreeView('chalk-environments', {
+    treeDataProvider: environmentsProvider,
+    showCollapseAll: false
+  });
+  
+  // Register refresh command
+  const refreshEnvironmentsCommand = commands.registerCommand('chalk-lsp.refreshEnvironments', () => {
+    environmentsProvider.refresh();
+  });
+  
+  // Register select environment command
+  const selectEnvironmentCommand = commands.registerCommand('chalk-lsp.selectEnvironment', (env: ChalkEnvironment) => {
+    window.showInformationMessage(`Selected environment: ${env.name}`);
+    // In a future enhancement, this could set the environment in .env or a config file
+  });
+  
+  // Register the tree view for cleanup
+  context.subscriptions.push(environmentsTreeView, refreshEnvironmentsCommand, selectEnvironmentCommand);
+  
   // Register the "Hi Chalk" command
   const hiChalkCommand = commands.registerCommand('chalk-lsp.hiChalk', () => {
     window.showInformationMessage('Hello world');

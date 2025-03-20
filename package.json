@@ -7,7 +7,10 @@
     "vscode": "^1.63.0"
   },
   "activationEvents": [
-    "onLanguage:python"
+    "onLanguage:python",
+    "onView:chalk-environments",
+    "onCommand:chalk-lsp.refreshEnvironments",
+    "onCommand:chalk-lsp.selectEnvironment"
   ],
   "contributes": {
     "languages": [
@@ -30,8 +33,39 @@
       {
         "command": "chalk-lsp.runLint",
         "title": "Chalk: Lint"
+      },
+      {
+        "command": "chalk-lsp.refreshEnvironments",
+        "title": "Chalk: Refresh Environments",
+        "icon": "$(refresh)"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chalk-explorer",
+          "title": "Chalk",
+          "icon": "$(layers)"
+        }
+      ]
+    },
+    "views": {
+      "chalk-explorer": [
+        {
+          "id": "chalk-environments",
+          "name": "Environments"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "chalk-lsp.refreshEnvironments",
+          "when": "view == chalk-environments",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "build": "tsc",
