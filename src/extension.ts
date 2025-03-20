@@ -31,6 +31,7 @@ interface ChalkEnvironment {
   project_id: string;
   id: string;
   team_id: string;
+  dashboard_url: string;
 }
 
 // Class representing a Chalk environment in the tree view
@@ -39,7 +40,7 @@ class ChalkEnvironmentItem extends TreeItem {
     public readonly environment: ChalkEnvironment
   ) {
     super(environment.name, TreeItemCollapsibleState.None);
-    this.tooltip = `ID: ${environment.id}\nProject ID: ${environment.project_id}\nTeam ID: ${environment.team_id}`;
+    this.tooltip = `ID: ${environment.id}\nProject ID: ${environment.project_id}\nTeam ID: ${environment.team_id}${environment.dashboard_url ? '\nDashboard: ' + environment.dashboard_url : ''}`;
     this.description = `(${environment.project_id})`;
     this.iconPath = new ThemeIcon('server-environment');
     
@@ -49,6 +50,9 @@ class ChalkEnvironmentItem extends TreeItem {
       title: 'Select Environment',
       arguments: [this.environment]
     };
+    
+    // Add context value to enable dashboard icon
+    this.contextValue = 'chalkEnvironment';
   }
 }
 
@@ -138,8 +142,18 @@ export function activate(context: ExtensionContext) {
     // In a future enhancement, this could set the environment in .env or a config file
   });
   
+  // Register open dashboard command
+  const openDashboardCommand = commands.registerCommand('chalk-lsp.openDashboard', (env: ChalkEnvironment) => {
+    if (env.dashboard_url) {
+      // Open the dashboard URL in the default browser
+      void commands.executeCommand('vscode.open', Uri.parse(env.dashboard_url));
+    } else {
+      window.showWarningMessage(`No dashboard URL available for ${env.name}`);
+    }
+  });
+  
   // Register the tree view for cleanup
-  context.subscriptions.push(environmentsTreeView, refreshEnvironmentsCommand, selectEnvironmentCommand);
+  context.subscriptions.push(environmentsTreeView, refreshEnvironmentsCommand, selectEnvironmentCommand, openDashboardCommand);
   
   // Register the "Hi Chalk" command
   const hiChalkCommand = commands.registerCommand('chalk-lsp.hiChalk', () => {

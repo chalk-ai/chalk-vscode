@@ -10,7 +10,8 @@
     "onLanguage:python",
     "onView:chalk-environments",
     "onCommand:chalk-lsp.refreshEnvironments",
-    "onCommand:chalk-lsp.selectEnvironment"
+    "onCommand:chalk-lsp.selectEnvironment",
+    "onCommand:chalk-lsp.openDashboard"
   ],
   "contributes": {
     "languages": [
@@ -38,6 +39,11 @@
         "command": "chalk-lsp.refreshEnvironments",
         "title": "Chalk: Refresh Environments",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "chalk-lsp.openDashboard",
+        "title": "Open Dashboard",
+        "icon": "$(globe)"
       }
     ],
     "viewsContainers": {
@@ -63,6 +69,13 @@
           "command": "chalk-lsp.refreshEnvironments",
           "when": "view == chalk-environments",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "chalk-lsp.openDashboard",
+          "when": "view == chalk-environments && viewItem == chalkEnvironment",
+          "group": "inline"
         }
       ]
     }
