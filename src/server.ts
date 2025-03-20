@@ -6,7 +6,9 @@ import {
   ProposedFeatures,
   InitializeParams,
   TextDocumentSyncKind,
-  InitializeResult
+  InitializeResult,
+  DiagnosticRelatedInformation,
+  Location
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -39,17 +41,33 @@ documents.onDidChangeContent(change => {
   validateTextDocument(change.document);
 });
 
-interface ChalkError {
-  message: string;
-  severity: 'error' | 'warning';
-  range: {
-    start: { line: number; character: number };
-    end: { line: number; character: number };
-  };
+interface ChalkJsonResponse {
+  error?: string;
+  message?: string;
 }
 
-interface ChalkResponse {
-  errors: ChalkError[];
+interface ChalkDiagnosticData {
+  uri: string;
+  diagnostics: {
+    range: {
+      start: { line: number; character: number };
+      end: { line: number; character: number };
+    };
+    message: string;
+    severity: string;
+    code: string;
+    codeDescription: any;
+    relatedInformation?: {
+      location: {
+        uri: string;
+        range: {
+          start: { line: number; character: number };
+          end: { line: number; character: number };
+        };
+      };
+      message: string;
+    }[];
+  }[];
 }
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
@@ -57,9 +75,32 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     // Convert the URI to a file path
     const fileUri = URI.parse(textDocument.uri);
     const filePath = fileUri.fsPath;
+    const workspaceFolder = path.dirname(filePath);
     
-    // Execute chalk lint command with LSP format
-    const { stdout, stderr } = await execAsync(`chalk lint --format=lsp "${filePath}"`);
+    let stdout = '';
+    let stderr = '';
+    
+    try {
+      // Execute chalk lint command with JSON format in the workspace folder
+      const result = await execAsync(`chalk lint --json`, {
+        cwd: workspaceFolder
+      });
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (execError: any) {
+      // Chalk lint command may exit with code 1 when it finds linting errors
+      // We still want to process its output in this case
+      if (execError.code === 1 && execError.stdout) {
+        stdout = execError.stdout;
+        if (execError.stderr) {
+          stderr = execError.stderr;
+        }
+      } else {
+        // For other errors, log and return
+        console.error(`chalk lint execution error:`, execError);
+        return;
+      }
+    }
     
     if (stderr) {
       console.error(`chalk lint stderr: ${stderr}`);
@@ -69,17 +110,48 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     
     if (stdout) {
       try {
-        const response: ChalkResponse = JSON.parse(stdout);
+        const jsonResponse: ChalkJsonResponse = JSON.parse(stdout);
         
-        if (response.errors && Array.isArray(response.errors)) {
-          diagnostics = response.errors.map(error => {
-            return {
-              severity: error.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
-              range: error.range,
-              message: error.message,
-              source: 'chalk'
-            };
-          });
+        if (jsonResponse.error) {
+          // Parse the nested JSON in the error field
+          const errorData = JSON.parse(jsonResponse.error);
+          
+          if (errorData.lsp && errorData.lsp.diagnostics) {
+            // Loop through all diagnostic groups
+            for (const diagnosticGroup of errorData.lsp.diagnostics) {
+              // Only process diagnostics for the current file
+              if (diagnosticGroup.uri === filePath) {
+                diagnostics = diagnosticGroup.diagnostics.map((diag: any) => {
+                  const severity = diag.severity === 'Error' 
+                    ? DiagnosticSeverity.Error 
+                    : DiagnosticSeverity.Warning;
+                  
+                  // Create related information if available
+                  const relatedInformation: DiagnosticRelatedInformation[] = [];
+                  if (diag.relatedInformation && diag.relatedInformation.length > 0) {
+                    for (const info of diag.relatedInformation) {
+                      relatedInformation.push({
+                        location: {
+                          uri: info.location.uri,
+                          range: info.location.range
+                        },
+                        message: info.message
+                      });
+                    }
+                  }
+                  
+                  return {
+                    severity,
+                    range: diag.range,
+                    message: diag.message,
+                    code: diag.code,
+                    source: 'chalk',
+                    relatedInformation: relatedInformation.length > 0 ? relatedInformation : undefined
+                  };
+                });
+              }
+            }
+          }
         }
       } catch (e) {
         console.error('Failed to parse chalk lint output:', e);
