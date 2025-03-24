@@ -3,3 +3,5 @@ dist/
 .vscode-test/
 *.vsix
 .DS_Store
+.idea/
+.env
