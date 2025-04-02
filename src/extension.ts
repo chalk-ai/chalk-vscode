@@ -234,7 +234,38 @@ export function activate(context: ExtensionContext) {
     }
   });
   
-  context.subscriptions.push(hiChalkCommand, showConfigCommand, runLintCommand);
+  // Register the "Chalk: Test Lint" command
+  const testLintCommand = commands.registerCommand('chalk-lsp.testLint', async () => {
+    try {
+      // Get the workspace folder paths
+      const workspaceFolders = workspace.workspaceFolders;
+      
+      if (!workspaceFolders || workspaceFolders.length === 0) {
+        window.showWarningMessage('No workspace folder is open.');
+        return;
+      }
+      
+      // Use the first workspace folder as the current working directory
+      const workspacePath = workspaceFolders[0].uri.fsPath;
+      
+      // Create or show a dedicated terminal for chalk commands
+      if (!chalkTerminal || chalkTerminal.exitStatus !== undefined) {
+        chalkTerminal = window.createTerminal('Chalk');
+      }
+      
+      chalkTerminal.show();
+      
+      // Change to the workspace directory
+      chalkTerminal.sendText(`cd "${workspacePath}"`);
+      
+      // Run chalk lint command with --lsp and --json flags
+      chalkTerminal.sendText('chalk lint --lsp --json || echo "Completed with issues"');
+    } catch (error) {
+      window.showErrorMessage(`Failed to run chalk test lint: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  });
+  
+  context.subscriptions.push(hiChalkCommand, showConfigCommand, runLintCommand, testLintCommand);
 
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(

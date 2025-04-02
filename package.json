@@ -1,6 +1,6 @@
 {
   "name": "chalk-lsp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LSP server for Chalk",
   "main": "dist/extension.js",
   "engines": {
@@ -11,8 +11,10 @@
     "onView:chalk-environments",
     "onCommand:chalk-lsp.refreshEnvironments",
     "onCommand:chalk-lsp.selectEnvironment",
-    "onCommand:chalk-lsp.openDashboard"
+    "onCommand:chalk-lsp.openDashboard",
+    "onCommand:chalk-lsp.testLint"
   ],
+  "publisher": "ChalkAI",
   "contributes": {
     "languages": [
       {
@@ -34,6 +36,10 @@
       {
         "command": "chalk-lsp.runLint",
         "title": "Chalk: Lint"
+      },
+      {
+        "command": "chalk-lsp.testLint",
+        "title": "Chalk: Test Lint"
       },
       {
         "command": "chalk-lsp.refreshEnvironments",
