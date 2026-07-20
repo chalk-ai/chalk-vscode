@@ -3,7 +3,7 @@ name: Publish Extension
 on:
   push:
     tags:
-      - "v*"
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: read
@@ -28,7 +28,7 @@ jobs:
 
       - name: Set extension version from release tag
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="$GITHUB_REF_NAME"
           [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
           npm version "$VERSION" --no-git-tag-version --allow-same-version
           sed -i "s/^## Unreleased$/## $VERSION/" CHANGELOG.md
