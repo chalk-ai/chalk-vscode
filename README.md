@@ -1,40 +1,45 @@
-# Chalk LSP
+# Chalk for VS Code and Cursor
 
-Language Server Protocol implementation for Chalk.
+The Chalk extension downloads and runs `chalk-lsp` for projects containing `chalk.yml` or `chalk.yaml`. `chalk-lsp` provides Python semantic analysis and typechecking, Chalk SQL resolver support, and Chalk configuration diagnostics. Updating it matters because those language features and their fixes ship in the server independently of extension releases.
 
-## Features
+## Install
 
-- Provides real-time linting of Chalk files
-- Displays errors and warnings directly in your editor
-- Uses the `chalk lint` command to validate files
+Install **Chalk** (`ChalkAI.chalk-lsp`) from the Visual Studio Marketplace or Open VSX. Cursor can install the same extension.
 
-## Requirements
+The first Chalk project you open downloads the latest server for your platform, verifies its SHA-256 checksum, and stores it in VS Code's extension data directory. Later activations do not look up releases, update automatically, or prompt you. The extension and `chalk-lsp` have independent versions.
 
-- Node.js
-- `chalk` binary installed and available in your PATH
+The status bar always shows the installed `chalk-lsp` version. To update manually, open the Command Palette and run **Chalk: Update Language Server**, or click that status item. This downloads and verifies the latest release, replaces the installed server, and restarts every Chalk client.
 
-## Installation
+Supported binaries are macOS and Linux on x86-64/ARM64 and Windows on x86-64.
 
-1. Clone this repository
-2. Run `npm install`
-3. Run `npm run build`
+## Commands
 
-## Usage
+- **Chalk: Show Configuration** shows the active environment and server endpoints in the Chalk output channel. It never displays client credentials.
+- **Chalk: Update Language Server** explicitly downloads the latest release, verifies it, installs it, and restarts every Chalk client.
+- **Chalk: Restart Language Server** restarts the installed server without checking for updates.
+- **Chalk: Show Language Server Output** opens server logs.
+- **Chalk: Configure Workspace** disables known competing Python language services when the active Chalk root is a VS Code workspace folder. For a Chalk root nested under a workspace folder, it shows the exact settings to merge without changing anything. Ruff formatting remains enabled. New `chalk init` projects already contain these settings.
 
-### VS Code Extension
+The extension starts one client for each top-level Chalk root in single-folder and multi-root workspaces. Nested Chalk projects are not supported. It does not change language-server settings in non-Chalk projects.
 
-Build this project and then link or install it into your VS Code extensions folder.
+The extension runs in the workspace extension host so remote workspaces install and run the server on the remote platform. It is disabled for untrusted and virtual workspaces because it downloads and executes a native language-server process and requires a filesystem-backed project.
 
-### Other Editors
+## Python language-server conflicts
 
-This LSP can be used with any editor that supports the Language Server Protocol. See your editor's documentation for details on how to connect to an external language server.
+`chalk-lsp` is Chalk's semantic and typechecking authority; it is not intended to run beside Pylance, Pyright, basedpyright, ty, pylsp/Jedi, or Ruff LSP. The extension reports likely conflicts but only changes an existing project when you invoke **Chalk: Configure Workspace**.
 
-## Configuration
+VS Code has window-scoped settings that cannot fully isolate every mixed multi-root layout. Use separate windows when a workspace combines Chalk and non-Chalk Python roots and the status bar reports a conflict.
 
-By default, the LSP will run `chalk lint --format=lsp` on your files. The command assumes that the `chalk` binary is in your PATH.
+## Development and publication
 
-## Development
+```bash
+npm install
+npm run build
+npm run package
+```
 
-- `npm run build` - Build the LSP server
-- `npm run watch` - Watch for changes and rebuild
-- `npm run start` - Start the LSP server
+Pushing a `v*` tag triggers the GitHub Actions publication workflow. The workflow installs the locked dependencies with Node.js 22, builds the extension, and publishes it to both the Visual Studio Marketplace and Open VSX using the repository-local `vsce` and `ovsx` versions. It requires the `VSCE_PAT` and `OVSX_PAT` repository secrets.
+
+## Troubleshooting
+
+Open **Chalk: Show Language Server Output** for installation and startup failures. A failed update leaves the previous binary installed. Use **Chalk: Update Language Server** to retry.

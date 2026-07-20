@@ -1,105 +1,68 @@
 {
   "name": "chalk-lsp",
-  "version": "0.1.1",
-  "description": "LSP server for Chalk",
-  "main": "dist/extension.js",
-  "engines": {
-    "vscode": "^1.63.0"
-  },
-  "activationEvents": [
-    "onLanguage:python",
-    "onView:chalk-environments",
-    "onCommand:chalk-lsp.refreshEnvironments",
-    "onCommand:chalk-lsp.selectEnvironment",
-    "onCommand:chalk-lsp.openDashboard",
-    "onCommand:chalk-lsp.testLint"
-  ],
+  "displayName": "Chalk",
+  "version": "0.2.0",
+  "description": "Chalk language intelligence and typechecking for Python and SQL resolvers",
   "publisher": "ChalkAI",
-  "contributes": {
-    "languages": [
-      {
-        "id": "python",
-        "extensions": [
-          ".py"
-        ]
-      }
-    ],
-    "commands": [
-      {
-        "command": "chalk-lsp.hiChalk",
-        "title": "Hi Chalk"
-      },
-      {
-        "command": "chalk-lsp.showConfig",
-        "title": "Chalk: Show Configuration"
-      },
-      {
-        "command": "chalk-lsp.runLint",
-        "title": "Chalk: Lint"
-      },
-      {
-        "command": "chalk-lsp.testLint",
-        "title": "Chalk: Test Lint"
-      },
-      {
-        "command": "chalk-lsp.refreshEnvironments",
-        "title": "Chalk: Refresh Environments",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "chalk-lsp.openDashboard",
-        "title": "Open Dashboard",
-        "icon": "$(globe)"
-      }
-    ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "chalk-explorer",
-          "title": "Chalk",
-          "icon": "$(layers)"
-        }
-      ]
+  "license": "MIT",
+  "icon": "resources/chalk.png",
+  "pricing": "Free",
+  "main": "dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chalk-ai/chalk-vscode.git"
+  },
+  "homepage": "https://docs.chalk.ai",
+  "bugs": "https://github.com/chalk-ai/chalk-vscode/issues",
+  "categories": ["Programming Languages", "Linters"],
+  "keywords": ["chalk", "chalk ai", "python", "sql", "feature platform", "type checker", "language server", "lsp"],
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "extensionKind": ["workspace"],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
     },
-    "views": {
-      "chalk-explorer": [
-        {
-          "id": "chalk-environments",
-          "name": "Environments"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
-        {
-          "command": "chalk-lsp.refreshEnvironments",
-          "when": "view == chalk-environments",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "chalk-lsp.openDashboard",
-          "when": "view == chalk-environments && viewItem == chalkEnvironment",
-          "group": "inline"
-        }
-      ]
+    "virtualWorkspaces": {
+      "supported": false
     }
   },
+  "activationEvents": [
+    "workspaceContains:**/chalk.yml",
+    "workspaceContains:**/chalk.yaml",
+    "onCommand:chalk-lsp.updateServer",
+    "onCommand:chalk-lsp.restartServer",
+    "onCommand:chalk-lsp.showOutput",
+    "onCommand:chalk-lsp.configureWorkspace"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "chalk-lsp.showConfig", "title": "Chalk: Show Configuration" },
+      { "command": "chalk-lsp.updateServer", "title": "Chalk: Update Language Server" },
+      { "command": "chalk-lsp.restartServer", "title": "Chalk: Restart Language Server" },
+      { "command": "chalk-lsp.showOutput", "title": "Chalk: Show Language Server Output" },
+      { "command": "chalk-lsp.configureWorkspace", "title": "Chalk: Configure Workspace" }
+    ]
+  },
   "scripts": {
+    "vscode:prepublish": "npm run build",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "package": "vsce package",
+    "publish:vsce": "vsce publish",
+    "publish:open-vsx": "ovsx publish"
   },
   "dependencies": {
-    "vscode-languageclient": "^8.0.2",
-    "vscode-languageserver": "^8.0.2",
-    "vscode-languageserver-textdocument": "^1.0.8",
-    "vscode-uri": "^3.0.7"
+    "adm-zip": "^0.6.0",
+    "tar": "^7.4.3",
+    "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^16.18.34",
-    "@types/vscode": "^1.63.0",
-    "typescript": "^4.9.5"
+    "@types/node": "^20.17.0",
+    "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^3.2.1",
+    "ovsx": "^0.10.2",
+    "typescript": "^5.7.2"
   }
 }
