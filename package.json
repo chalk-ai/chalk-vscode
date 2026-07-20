@@ -1,7 +1,7 @@
 {
   "name": "chalk-lsp",
   "displayName": "Chalk",
-  "version": "0.2.0",
+  "version": "0.0.0",
   "description": "Chalk language intelligence and typechecking for Python and SQL resolvers",
   "publisher": "ChalkAI",
   "license": "MIT",

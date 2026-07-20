@@ -2,6 +2,7 @@
 .vscode/**
 .github/**
 Justfile
+release.sh
 src/**
 tsconfig.json
 dist/**/*.map

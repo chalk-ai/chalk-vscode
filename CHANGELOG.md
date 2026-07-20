@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## Unreleased
 
 - Replace the legacy Node server with a managed, checksum-verified native `chalk-lsp`.
 - Isolate language-server clients by Chalk workspace root.
