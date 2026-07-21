@@ -1,5 +1,5 @@
 {
-  "name": "chalk-lsp",
+  "name": "chalk-vscode",
   "displayName": "Chalk",
   "version": "0.0.0",
   "description": "Chalk language intelligence and typechecking for Python and SQL resolvers",
