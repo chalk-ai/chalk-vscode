@@ -62,6 +62,11 @@ jobs:
           node-version: "22"
           cache: npm
 
+      - name: Require Visual Studio Marketplace token
+        run: test -n "$VSCE_PAT" || { echo "::error::Missing VSCE_PAT repository secret"; exit 1; }
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
       - name: Install dependencies
         run: npm ci
 
@@ -87,6 +92,11 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+
+      - name: Require Open VSX token
+        run: test -n "$OVSX_PAT" || { echo "::error::Missing OVSX_PAT repository secret"; exit 1; }
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
       - name: Install dependencies
         run: npm ci
