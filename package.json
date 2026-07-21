@@ -3,7 +3,7 @@
   "displayName": "Chalk",
   "version": "0.0.0",
   "description": "Chalk language intelligence and typechecking for Python and SQL resolvers",
-  "publisher": "ChalkAI",
+  "publisher": "chalk-ai",
   "license": "MIT",
   "icon": "resources/chalk.png",
   "pricing": "Free",
@@ -14,12 +14,26 @@
   },
   "homepage": "https://docs.chalk.ai",
   "bugs": "https://github.com/chalk-ai/chalk-vscode/issues",
-  "categories": ["Programming Languages", "Linters"],
-  "keywords": ["chalk", "chalk ai", "python", "sql", "feature platform", "type checker", "language server", "lsp"],
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "chalk",
+    "chalk ai",
+    "python",
+    "sql",
+    "feature platform",
+    "type checker",
+    "language server",
+    "lsp"
+  ],
   "engines": {
     "vscode": "^1.96.0"
   },
-  "extensionKind": ["workspace"],
+  "extensionKind": [
+    "workspace"
+  ],
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": false
@@ -38,11 +52,26 @@
   ],
   "contributes": {
     "commands": [
-      { "command": "chalk-lsp.showConfig", "title": "Chalk: Show Configuration" },
-      { "command": "chalk-lsp.updateServer", "title": "Chalk: Update Language Server" },
-      { "command": "chalk-lsp.restartServer", "title": "Chalk: Restart Language Server" },
-      { "command": "chalk-lsp.showOutput", "title": "Chalk: Show Language Server Output" },
-      { "command": "chalk-lsp.configureWorkspace", "title": "Chalk: Configure Workspace" }
+      {
+        "command": "chalk-lsp.showConfig",
+        "title": "Chalk: Show Configuration"
+      },
+      {
+        "command": "chalk-lsp.updateServer",
+        "title": "Chalk: Update Language Server"
+      },
+      {
+        "command": "chalk-lsp.restartServer",
+        "title": "Chalk: Restart Language Server"
+      },
+      {
+        "command": "chalk-lsp.showOutput",
+        "title": "Chalk: Show Language Server Output"
+      },
+      {
+        "command": "chalk-lsp.configureWorkspace",
+        "title": "Chalk: Configure Workspace"
+      }
     ]
   },
   "scripts": {
