@@ -40,6 +40,10 @@ npm run package
 
 Run `./release.sh` (or `just release`) and select a semantic-version bump. The shared Chalk release script creates the next GitHub release and bare semantic-version tag; the tag triggers the publication workflow, which uses that tag as the extension version. The workflow installs the locked dependencies with Node.js 22, builds one VSIX, and publishes that same package independently to the Visual Studio Marketplace and Open VSX using the repository-local `vsce` and `ovsx` versions. Configure the `VSCE_PAT` and `OVSX_PAT` repository secrets before releasing. Cursor receives the Open VSX publication; it does not use a separate package.
 
+## Manual installation
+
+Build the extension using the commands under [Development and publication](#development-and-publication). In VS Code or Cursor, open the Extensions view, choose **Install from VSIX...** from the **...** menu, and select the generated `chalk-lsp-*.vsix` file.
+
 ## Troubleshooting
 
 Open **Chalk: Show Language Server Output** for installation and startup failures. A failed update leaves the previous binary installed. Use **Chalk: Update Language Server** to retry.
